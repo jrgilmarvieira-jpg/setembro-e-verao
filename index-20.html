@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Thayse & Gilmar — Feliz Dia dos Namorados</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --night:#07101f;--deep:#0d1b2e;--ocean:#163652;
+  --sand:#c9a96e;--gold:#f0c674;--coral:#e07b5a;
+  --sage:#6b8f71;--mist:#d4c9b8;--star:#fff8e7;
+}
+html,body{height:100%;font-family:'Georgia',serif;background:var(--night);color:var(--mist);overflow:hidden}
+
+/* ── STARS ── */
+#stars-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ── PETALS ── */
+.petal{position:fixed;top:-40px;font-size:1rem;opacity:0;z-index:1;pointer-events:none;animation:petalFall linear infinite}
+@keyframes petalFall{0%{transform:translateY(0) rotate(0deg) translateX(0);opacity:.7}50%{transform:translateY(50vh) rotate(180deg) translateX(15px);opacity:.4}100%{transform:translateY(110vh) rotate(360deg) translateX(-10px);opacity:0}}
+
+/* ── APP / SCREENS ── */
+#app{position:fixed;inset:0;overflow:hidden}
+.screen{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px 24px 80px;text-align:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .9s ease;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+}
+.screen.active{opacity:1;pointer-events:all}
+
+/* ── DOTS ── */
+#progress-dots{position:fixed;bottom:56px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:300;pointer-events:none}
+.dot{width:5px;height:5px;border-radius:50%;background:rgba(240,198,116,.25);transition:background .4s,transform .4s}
+.dot.active{background:var(--gold);transform:scale(1.3)}
+
+/* ── NAV ── */
+#nav-prev,#nav-next{position:fixed;top:50%;transform:translateY(-50%);z-index:300;background:rgba(240,198,116,.08);border:1px solid rgba(240,198,116,.2);color:var(--gold);width:38px;height:38px;border-radius:50%;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .3s;opacity:0}
+#nav-prev{left:6px}#nav-next{right:6px}
+#nav-prev.visible,#nav-next.visible{opacity:1}
+
+/* ── FIXED PLAYER ── */
+#fixed-player{
+  position:fixed;bottom:8px;left:50%;transform:translateX(-50%);
+  z-index:400;background:rgba(7,16,31,.92);backdrop-filter:blur(16px);
+  border:1px solid rgba(240,198,116,.2);border-radius:40px;
+  padding:8px 18px;display:none;align-items:center;gap:10px;min-width:190px;max-width:90vw;
+}
+#fixed-player.show{display:flex}
+.fp-title{font-size:.68rem;color:var(--gold);letter-spacing:.1em;white-space:nowrap;font-style:italic;flex:1}
+.fp-btn{width:30px;height:30px;border-radius:50%;background:var(--gold);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fp-btn svg{width:13px;fill:var(--night);margin-left:2px}
+.fp-progress{width:60px;height:3px;background:rgba(255,255,255,.1);border-radius:3px;cursor:pointer}
+.fp-bar{height:100%;background:linear-gradient(to right,var(--gold),var(--coral));border-radius:3px;width:0%;pointer-events:none}
+
+/* ── TYPOGRAPHY ── */
+.eyebrow{font-size:.63rem;letter-spacing:.35em;text-transform:uppercase;color:var(--sand);opacity:.7;margin-bottom:14px}
+.gold{color:var(--gold)}
+.btn-primary{margin-top:36px;padding:14px 40px;background:transparent;border:1px solid var(--gold);color:var(--gold);font-family:'Georgia',serif;font-size:.95rem;letter-spacing:.12em;cursor:pointer;border-radius:40px;transition:background .3s,color .3s,transform .2s}
+.btn-primary:active{background:var(--gold);color:var(--night);transform:scale(1.04)}
+.btn-tap{margin-top:24px;font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:var(--sand);opacity:.5;animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:.5}50%{opacity:.9}}
+
+/* ══════════════════════════════════════
+   S1 — INTRO
+══════════════════════════════════════ */
+#s1{background:transparent;z-index:10}
+.t-line{font-style:italic;font-size:clamp(1.05rem,3.5vw,1.5rem);color:var(--star);line-height:1.7;opacity:0;transform:translateY(12px);transition:opacity .7s ease,transform .7s ease;display:block;margin-bottom:10px}
+.t-line.show{opacity:1;transform:translateY(0)}
+.t-line.accent{color:var(--gold);font-size:clamp(1.1rem,4vw,1.6rem)}
+
+/* ══════════════════════════════════════
+   S2 — HERO FULLSCREEN PHOTO
+══════════════════════════════════════ */
+#s2{padding:0}
+.hero-full{position:relative;width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+.hero-full img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}
+.hero-full::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(7,16,31,.1) 0%,rgba(7,16,31,.0) 30%,rgba(7,16,31,.7) 70%,rgba(7,16,31,.95) 100%)}
+.hero-text{position:relative;z-index:2;padding:0 28px 100px;text-align:center;width:100%}
+.hero-text h1{font-size:clamp(2.8rem,11vw,5.5rem);font-style:italic;font-weight:normal;color:var(--star);line-height:1.05;margin-bottom:10px}
+.hero-text h1 span{color:var(--gold)}
+.hero-text p{font-style:italic;font-size:clamp(.95rem,2.8vw,1.2rem);color:var(--mist);line-height:1.8;opacity:.9}
+.hero-text .eyebrow{margin-bottom:8px;opacity:.6}
+
+/* ══════════════════════════════════════
+   S3 — POR QUE (foto fundo + glass)
+══════════════════════════════════════ */
+#s3{padding:0}
+.glass-screen{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.glass-screen .bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.45) saturate(.85)}
+.glass-card{position:relative;z-index:2;background:rgba(7,16,31,.32);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(240,198,116,.18);border-radius:24px;padding:40px 32px;max-width:480px;width:calc(100% - 48px);text-align:center}
+.reveal-line{font-style:italic;font-size:clamp(.95rem,2.8vw,1.2rem);color:var(--mist);line-height:1.9;opacity:0;transform:translateY(16px);margin-bottom:6px;display:block}
+.reveal-line.show{opacity:1;transform:translateY(0);transition:opacity .7s ease,transform .7s ease}
+.reveal-line.accent{color:var(--gold);font-size:clamp(1rem,3vw,1.3rem)}
+
+/* ══════════════════════════════════════
+   S4 — SETEMBRO (glass)
+══════════════════════════════════════ */
+#s4{padding:0}
+
+/* ══════════════════════════════════════
+   S5 — BRILHO DOS OLHOS (foto fundo)
+══════════════════════════════════════ */
+#s5{padding:0}
+
+/* ══════════════════════════════════════
+   S6 — JORNADA
+══════════════════════════════════════ */
+#s6{background:linear-gradient(180deg,var(--deep) 0%,var(--ocean) 100%);padding:40px 24px 80px}
+.journey{display:flex;flex-direction:column;align-items:center;max-width:320px;width:100%}
+.j-stop{display:flex;flex-direction:column;align-items:center;opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+.j-stop.show{opacity:1;transform:translateY(0)}
+.j-pin{background:rgba(255,255,255,.04);border:1px solid rgba(240,198,116,.2);border-radius:32px;padding:10px 24px;font-size:.9rem;color:var(--star);text-align:center}
+.j-pin.hl{border-color:rgba(240,198,116,.5);background:rgba(240,198,116,.08)}
+.j-pin.special{border-color:rgba(240,198,116,.6);background:rgba(240,198,116,.12);color:var(--gold)}
+.j-pin.final{border-color:rgba(224,123,90,.5);background:rgba(224,123,90,.08);color:var(--coral)}
+.j-pin small{display:block;font-size:.63rem;color:var(--sand);letter-spacing:.1em;margin-top:2px;opacity:.7}
+.j-arrow{color:var(--sand);opacity:.35;font-size:1rem;margin:4px 0}
+
+/* ══════════════════════════════════════
+   S7 — VERÃO WRAPPED
+══════════════════════════════════════ */
+#s7{padding:0}
+
+/* ══════════════════════════════════════
+   S8 — NOSSOS MOMENTOS
+══════════════════════════════════════ */
+#s8{background:var(--night);padding:50px 12px 100px;justify-content:flex-start}
+.moments-masonry{columns:2;column-gap:10px;max-width:520px;width:100%;margin-top:16px}
+.m-item{break-inside:avoid;margin-bottom:10px;border-radius:14px;overflow:hidden;position:relative;border:1px solid rgba(240,198,116,.15);cursor:pointer;transition:transform .3s}
+.m-item:hover{transform:scale(1.02)}
+.m-item img,.m-item video{width:100%;display:block;object-fit:cover}
+.m-item::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(240,198,116,.06),transparent);pointer-events:none}
+
+/* ══════════════════════════════════════
+   S9 — NOSSOS NÚMEROS
+══════════════════════════════════════ */
+#s9{background:linear-gradient(135deg,#0a1a2a,#1a0d2a);padding:40px 24px 100px}
+.numbers-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:380px;width:100%;margin-top:20px}
+.num-card{background:rgba(255,255,255,.04);border:1px solid rgba(240,198,116,.15);border-radius:16px;padding:18px 12px;opacity:0;transform:scale(.9);transition:opacity .5s ease,transform .5s ease;text-align:center}
+.num-card.show{opacity:1;transform:scale(1)}
+.num-card .n-emoji{font-size:1.5rem;margin-bottom:5px;display:block}
+.num-card .n-val{font-size:clamp(1.4rem,5vw,2rem);color:var(--gold);font-style:italic;display:block;line-height:1}
+.num-card .n-label{font-size:.63rem;color:var(--sand);letter-spacing:.1em;text-transform:uppercase;opacity:.7;margin-top:4px;display:block}
+/* contador */
+.counter-card{grid-column:1/-1;background:rgba(240,198,116,.06);border:1px solid rgba(240,198,116,.25);border-radius:16px;padding:20px 16px;opacity:0;transform:scale(.9);transition:opacity .5s ease,transform .5s ease;text-align:center}
+.counter-card.show{opacity:1;transform:scale(1)}
+.counter-label{font-size:.63rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sand);opacity:.7;margin-bottom:8px;display:block}
+.counter-title{font-style:italic;font-size:1rem;color:var(--gold);margin-bottom:10px;display:block}
+.counter-digits{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.c-unit{display:flex;flex-direction:column;align-items:center;gap:2px}
+.c-num{font-size:clamp(1.4rem,5vw,2rem);color:var(--star);font-style:italic;line-height:1;min-width:32px}
+.c-label{font-size:.55rem;color:var(--sand);letter-spacing:.1em;text-transform:uppercase;opacity:.6}
+.c-sep{font-size:1.5rem;color:var(--gold);opacity:.4;align-self:flex-start;margin-top:4px}
+
+/* ══════════════════════════════════════
+   S10 — ADMIRO
+══════════════════════════════════════ */
+#s10{padding:0}
+
+/* ══════════════════════════════════════
+   S11 — NA HORA CERTA
+══════════════════════════════════════ */
+#s11{padding:0}
+
+/* ══════════════════════════════════════
+   S12 — DISTÂNCIA + MAPA
+══════════════════════════════════════ */
+#s12{background:linear-gradient(180deg,var(--deep),#0d1e10);padding:40px 24px 100px}
+.map-container{width:100%;max-width:360px;margin:20px auto;position:relative}
+.map-svg-wrap{width:100%;border-radius:16px;overflow:hidden;border:1px solid rgba(240,198,116,.15);background:rgba(7,16,31,.8)}
+.map-svg-wrap svg{width:100%;display:block}
+.city-label{font-style:italic;font-size:.75rem;fill:var(--star)}
+.city-dot{animation:pulseDot 2s ease-in-out infinite}
+@keyframes pulseDot{0%,100%{r:5;opacity:1}50%{r:8;opacity:.6}}
+.flight-path{stroke-dasharray:4 3;animation:dash 3s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-20}}
+.plane-anim{animation:flyPath 4s linear infinite}
+@keyframes flyPath{0%{offset-distance:0%}100%{offset-distance:100%}}
+.distance-cities{display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:8px}
+.dc{background:rgba(255,255,255,.04);border:1px solid rgba(240,198,116,.2);border-radius:14px;padding:12px 16px;flex:1;text-align:center}
+.dc small{display:block;font-size:.62rem;color:var(--sand);opacity:.6;margin-top:2px}
+.dc-arrow{color:var(--gold);opacity:.5;font-size:1.2rem}
+.dc-km{font-size:.72rem;color:var(--gold);font-style:italic;margin-top:10px;text-align:center}
+
+/* ══════════════════════════════════════
+   S13 — TIMELINE IMERSIVA (vertical)
+══════════════════════════════════════ */
+#s13{padding:0;background:transparent}
+.tl-slider{width:100%;height:100%;overflow:hidden;position:relative}
+.tl-slide{
+  position:absolute;inset:0;
+  display:flex;align-items:flex-end;justify-content:center;
+  overflow:hidden;
+  transition:transform .6s cubic-bezier(.4,0,.2,1);
+}
+.tl-slide .slide-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.45) saturate(.9)}
+.tl-slide::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(7,16,31,.1) 0%,rgba(7,16,31,.0) 20%,rgba(7,16,31,.75) 60%,rgba(7,16,31,.97) 100%)}
+.tl-content{position:relative;z-index:2;padding:0 28px 120px;text-align:center;width:100%}
+.tl-content .tl-emoji{font-size:2rem;display:block;margin-bottom:10px}
+.tl-content .tl-title{font-size:clamp(1.5rem,6vw,2.2rem);font-style:italic;color:var(--gold);margin-bottom:12px;font-weight:normal}
+.tl-content .tl-desc{font-style:italic;font-size:clamp(.9rem,2.5vw,1.1rem);color:var(--star);line-height:1.8;max-width:400px;margin:0 auto}
+/* nav vertical dentro do slider */
+.tl-nav{position:absolute;bottom:72px;left:0;right:0;display:flex;justify-content:center;gap:8px;z-index:10}
+.tl-dot-item{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:background .3s,transform .3s}
+.tl-dot-item.active{background:var(--gold);transform:scale(1.3)}
+/* setas verticais (cima/baixo) */
+.tl-arrow{position:absolute;left:50%;transform:translateX(-50%);z-index:10;background:rgba(7,16,31,.5);border:1px solid rgba(240,198,116,.25);color:var(--gold);width:36px;height:36px;border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .3s}
+.tl-arrow:hover{background:rgba(240,198,116,.15)}
+.tl-arrow.left{top:14px}
+.tl-arrow.right{bottom:88px}
+
+/* S14 — GRANDE FINAL (sem estilo extra necessário) */
+
+/* ══════════════════════════════════════
+   S14 — GRANDE FINAL
+══════════════════════════════════════ */
+#s15{background:linear-gradient(180deg,var(--night),#0d1e10 50%,var(--night));padding:40px 24px 100px}
+.fl{font-style:italic;font-size:clamp(1.1rem,3.5vw,1.5rem);color:var(--mist);line-height:1.9;opacity:0;transform:translateY(14px);transition:opacity .8s ease,transform .8s ease;display:block}
+.fl.show{opacity:1;transform:translateY(0)}
+.fl.gld{color:var(--gold);font-size:clamp(1.2rem,4vw,1.7rem)}
+
+/* ══════════════════════════════════════
+   S15 — LETRA
+══════════════════════════════════════ */
+#s16{background:linear-gradient(180deg,var(--night),var(--deep));justify-content:flex-start;padding:60px 24px 100px}
+.lyrics-block{max-width:540px;width:100%}
+.l-tag{font-size:.6rem;letter-spacing:.35em;text-transform:uppercase;color:var(--coral);margin-bottom:12px;display:block}
+.l-tag.r{color:var(--gold)}.l-tag.p{color:var(--mist)}.l-tag.b{color:var(--sage)}.l-tag.o{color:var(--sand)}
+.l-text{font-style:italic;font-size:clamp(.95rem,2.5vw,1.15rem);line-height:2.1;color:var(--star);margin-bottom:32px}
+.l-text.chorus{color:var(--gold);font-size:clamp(1rem,2.7vw,1.25rem)}
+.l-text.pre{color:var(--mist);opacity:.85}
+.l-text.outro{color:var(--sand);opacity:.9}
+.l-sep{width:28px;height:1px;background:linear-gradient(to right,transparent,var(--sand),transparent);margin:24px auto;opacity:.3}
+
+/* ══════════════════════════════════════
+   S16 — FINAL FULLSCREEN GLASSMORPHISM
+══════════════════════════════════════ */
+#s17{padding:0}
+.final-full{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.final-full .final-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+.final-full::after{content:'';position:absolute;inset:0;background:rgba(7,16,31,.55)}
+.final-glass{position:relative;z-index:2;background:rgba(7,16,31,.32);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(240,198,116,.2);border-radius:28px;padding:40px 32px;max-width:460px;width:calc(100% - 40px);text-align:center;max-height:90vh;overflow-y:auto}
+.final-glass p{font-style:italic;font-size:clamp(.9rem,2.5vw,1.1rem);color:var(--star);line-height:2;margin-bottom:6px}
+.final-glass .sign{color:var(--gold);font-size:clamp(1rem,3vw,1.3rem);display:block;margin-top:16px}
+.final-glass .day-badge{font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);opacity:.7;margin-bottom:20px;display:block}
+.restart-btn{margin-top:24px;padding:11px 28px;background:transparent;border:1px solid rgba(240,198,116,.3);color:var(--sand);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;border-radius:32px;transition:border-color .3s,color .3s}
+.restart-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ── LIGHTBOX ── */
+#lightbox{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.94);display:none;align-items:center;justify-content:center;padding:20px}
+#lightbox.open{display:flex}
+#lightbox img,#lightbox video{max-width:90vw;max-height:90vh;border-radius:12px;object-fit:contain}
+#lb-close{position:absolute;top:18px;right:20px;font-size:2rem;color:white;cursor:pointer;background:none;border:none;opacity:.6;line-height:1}
+
+#audio-el{display:none}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:rgba(240,198,116,.2);border-radius:3px}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<canvas id="stars-canvas"></canvas>
+
+<div id="lightbox">
+  <button id="lb-close" onclick="closeLb()">✕</button>
+  <img id="lb-img" src="" alt="" style="display:none">
+  <video id="lb-vid" controls playsinline style="display:none"></video>
+</div>
+
+<audio id="audio-el" loop>
+  <source src="musica.mpeg" type="audio/mpeg">
+</audio>
+
+<div id="fixed-player">
+  <button class="fp-btn" id="fp-play" onclick="toggleAudio()">
+    <svg id="fp-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+  </button>
+  <span class="fp-title">Na hora certa</span>
+  <div class="fp-progress" onclick="seekFp(event)">
+    <div class="fp-bar" id="fp-bar"></div>
+  </div>
+</div>
+
+<div id="progress-dots"></div>
+<button id="nav-prev" onclick="prevScreen()">‹</button>
+<button id="nav-next" onclick="nextScreen()">›</button>
+
+<div id="app">
+
+<!-- ══ S1 — INTRO ══ -->
+<div class="screen" id="s1">
+  <div style="max-width:480px">
+    <span class="t-line" id="tl1">Oi, meu bem...</span>
+    <span class="t-line" id="tl2">Neste Dia dos Namorados...</span>
+    <span class="t-line" id="tl3">Eu queria te dar algo diferente.</span>
+    <span class="t-line" id="tl4">Não apenas flores.</span>
+    <span class="t-line" id="tl5">Não apenas uma música.</span>
+    <span class="t-line accent" id="tl6">Mas a nossa história.</span>
+    <span class="t-line accent" id="tl7">"Nunca vou esquecer o brilho no seu olhar."</span>
+  </div>
+  <button class="btn-primary" id="enter-btn" style="opacity:0;transition:opacity .8s ease" onclick="startExp()">❤️ &nbsp; Começar nossa história</button>
+</div>
+
+<!-- ══ S2 — HERO FULLSCREEN ══ -->
+<div class="screen" id="s2">
+  <div class="hero-full">
+    <img src="foto_favorita.jpeg" alt="Nós dois">
+    <div class="hero-text">
+      <p class="eyebrow">Dia dos Namorados · 2026</p>
+      <h1>Thayse <span>&</span> Gilmar</h1>
+      <p>Uma história que começou em setembro,<br>se estendeu pelo verão<br>e resolveu se eternizar.</p>
+      <p class="btn-tap" style="margin-top:20px">toque para continuar</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S3 — POR QUE (glass) ══ -->
+<div class="screen" id="s3">
+  <div class="glass-screen">
+    <img class="bg-img" src="foto01.jpeg" alt="">
+    <div class="glass-card">
+      <p class="eyebrow" style="margin-bottom:16px">por que esta música existe?</p>
+      <span class="reveal-line" id="rl1">Porque você chegou quando eu não estava procurando ninguém.</span>
+      <span class="reveal-line" id="rl2">Porque me mostrou que eu ainda podia acreditar em um relacionamento.</span>
+      <span class="reveal-line" id="rl3">Porque transformou uma lembrança bonita de setembro em algo muito maior.</span>
+      <span class="reveal-line accent" id="rl4">"Porque hoje eu tenho a certeza de que valeu a pena te encontrar."</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S4 — SETEMBRO (glass) ══ -->
+<div class="screen" id="s4">
+  <div class="glass-screen">
+    <img class="bg-img" src="setembro.jpeg" alt="Setembro">
+    <div class="glass-card">
+      <div style="font-size:2.2rem;margin-bottom:14px">✨</div>
+      <p class="eyebrow" style="margin-bottom:10px">setembro · parque harmonia</p>
+      <p style="font-style:italic;font-size:clamp(1rem,2.8vw,1.2rem);color:var(--star);line-height:1.9">
+        Uma lembrança bonita.<br>
+        Uma noite entre as luzes.<br>
+        Uma ficada sem promessas.
+      </p>
+      <p style="font-style:italic;font-size:1rem;color:var(--gold);margin-top:18px">
+        "Mas aquela noite ainda tinha história pra contar."
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S5 — BRILHO DOS OLHOS ══ -->
+<div class="screen" id="s5">
+  <div class="glass-screen">
+    <img class="bg-img" src="foto02.jpeg" alt="">
+    <div class="glass-card">
+      <div style="font-size:3rem;margin-bottom:16px;filter:drop-shadow(0 0 16px rgba(240,198,116,.6))">✨</div>
+      <p class="eyebrow">a primeira coisa que eu percebi</p>
+      <p style="font-size:clamp(1.8rem,7vw,3rem);font-style:italic;color:var(--star);line-height:1.1;margin:10px 0">O brilho<br><span style="color:var(--gold)">dos seus olhos.</span></p>
+      <p style="font-style:italic;font-size:clamp(.9rem,2.5vw,1.1rem);color:var(--mist);line-height:1.8;margin-top:14px;opacity:.9">Não sei explicar.<br>Mas foi ali que algo começou<br>sem eu querer.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S6 — JORNADA ══ -->
+<div class="screen" id="s6">
+  <div class="glass-screen" style="position:absolute;inset:0">
+    <img class="bg-img" src="historia.jpeg" alt="" style="filter:brightness(.28) saturate(.7)">
+  </div>
+  <div style="position:relative;z-index:2;width:100%;display:flex;flex-direction:column;align-items:center;padding:40px 24px 80px">
+  <p class="eyebrow" style="margin-bottom:10px">os lugares da nossa história</p>
+  <div class="journey">
+    <div class="j-stop" id="js1"><div class="j-pin hl">📍 Parque Harmonia<small>onde tudo começou</small></div></div>
+    <div class="j-arrow">↓</div>
+    <div class="j-stop" id="js2"><div class="j-pin">🌿 Tucuruí / PA<small>a vida seguiu em frente</small></div></div>
+    <div class="j-arrow">↓</div>
+    <div class="j-stop" id="js3"><div class="j-pin">☀️ Porto Alegre<small>o reencontro</small></div></div>
+    <div class="j-arrow">↓</div>
+    <div class="j-stop" id="js4"><div class="j-pin">🌊 Tramandaí<small>o verão começou</small></div></div>
+    <div class="j-arrow">↓</div>
+    <div class="j-stop" id="js5"><div class="j-pin">🏖️ Imbituba / SC<small>e a vovó</small></div></div>
+    <div class="j-arrow">↓</div>
+    <div class="j-stop" id="js6"><div class="j-pin special">💍 Rio de Janeiro<small>o pedido de namoro</small></div></div>
+    <div class="j-arrow">↓</div>
+    <div class="j-stop" id="js7"><div class="j-pin final">❤️ Hoje — juntos onde estiver</div></div>
+  </div>
+  </div>
+</div>
+
+<!-- ══ S7 — VERÃO WRAPPED (glass) ══ -->
+<div class="screen" id="s7">
+  <div class="glass-screen">
+    <img class="bg-img" src="foto03.jpeg" alt="">
+    <div class="glass-card">
+      <p class="eyebrow" style="margin-bottom:6px">o capítulo que mudou tudo</p>
+      <p style="font-size:clamp(3.5rem,14vw,6rem);font-style:italic;color:var(--gold);line-height:1;margin:10px 0;font-weight:normal">Verão</p>
+      <p style="font-style:italic;font-size:clamp(.95rem,2.5vw,1.15rem);color:var(--mist);line-height:1.8">O que era pra ser passageiro<br>virou a coisa mais real da vida.</p>
+      <p style="margin-top:20px;font-style:italic;font-size:.82rem;color:var(--sand);opacity:.7">"A gente brincava que era só verão."</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S8 — NOSSOS MOMENTOS ══ -->
+<div class="screen" id="s8">
+  <p class="eyebrow">nossos momentos</p>
+  <div class="moments-masonry">
+    <div class="m-item" onclick="openLb('img','foto01.jpeg')"><img src="foto01.jpeg" alt=""></div>
+    <div class="m-item" onclick="openLb('vid','video01.mp4')"><video src="video01.mp4" autoplay muted loop playsinline></video></div>
+    <div class="m-item" onclick="openLb('img','foto02.jpeg')"><img src="foto02.jpeg" alt=""></div>
+    <div class="m-item" onclick="openLb('img','foto03.jpeg')"><img src="foto03.jpeg" alt=""></div>
+    <div class="m-item" onclick="openLb('vid','video02.mp4')"><video src="video02.mp4" autoplay muted loop playsinline></video></div>
+    <div class="m-item" onclick="openLb('img','foto04.jpeg')"><img src="foto04.jpeg" alt=""></div>
+    <div class="m-item" onclick="openLb('img','foto05.jpeg')"><img src="foto05.jpeg" alt=""></div>
+    <div class="m-item" onclick="openLb('vid','video03.mp4')"><video src="video03.mp4" autoplay muted loop playsinline></video></div>
+    <div class="m-item" onclick="openLb('img','foto06.jpeg')"><img src="foto06.jpeg" alt=""></div>
+    <div class="m-item" onclick="openLb('img','foto07.jpeg')"><img src="foto07.jpeg" alt=""></div>
+    <div class="m-item" onclick="openLb('vid','video04.mp4')"><video src="video04.mp4" autoplay muted loop playsinline></video></div>
+    <div class="m-item" onclick="openLb('img','foto08.jpeg')"><img src="foto08.jpeg" alt=""></div>
+  </div>
+  <button class="btn-primary" onclick="nextScreen()" style="margin-top:28px">Continuar →</button>
+</div>
+
+<!-- ══ S9 — NOSSOS NÚMEROS ══ -->
+<div class="screen" id="s9">
+  <p class="eyebrow">nossos números</p>
+  <div class="numbers-grid" id="numGrid">
+    <div class="num-card"><span class="n-emoji">📍</span><span class="n-val">3</span><span class="n-label">cidades</span></div>
+    <div class="num-card"><span class="n-emoji">🌊</span><span class="n-val">∞</span><span class="n-label">praias</span></div>
+    <div class="num-card"><span class="n-emoji">💬</span><span class="n-val">∞</span><span class="n-label">conversas</span></div>
+    <div class="num-card"><span class="n-emoji">❤️</span><span class="n-val">1</span><span class="n-label">amor real</span></div>
+    <!-- Contador 1: desde que se conheceram -->
+    <div class="counter-card" id="counter1">
+      <span class="counter-label">✨ desde a noite que mudou tudo</span>
+      <span class="counter-title" style="font-size:.85rem;line-height:1.4">Parque Harmonia · 10 de Setembro de 2025<br><span style="font-size:.72rem;color:var(--mist);opacity:.7;font-style:normal">quando o brilho dos seus olhos me pegou</span></span>
+      <div class="counter-digits" id="cd1"></div>
+    </div>
+    <!-- Contador 2: desde o namoro -->
+    <div class="counter-card" id="counter2">
+      <span class="counter-label">💍 juntos de verdade</span>
+      <span class="counter-title" style="font-size:.85rem;line-height:1.4">Rio de Janeiro · 14 de Março de 2026<br><span style="font-size:.72rem;color:var(--mist);opacity:.7;font-style:normal">o dia em que eu escolhi você pra sempre</span></span>
+      <div class="counter-digits" id="cd2"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S10 — ADMIRO (glass) ══ -->
+<div class="screen" id="s10">
+  <div class="glass-screen">
+    <img class="bg-img" src="foto04.jpeg" alt="">
+    <div class="glass-card" style="max-width:420px">
+      <p class="eyebrow" style="margin-bottom:16px">o que eu admiro em você</p>
+      <div id="qualWrap">
+        <div class="quality-item">✨ &nbsp; Seu cuidado</div>
+        <div class="quality-item">✨ &nbsp; Sua honestidade</div>
+        <div class="quality-item">✨ &nbsp; Sua sinceridade</div>
+        <div class="quality-item">✨ &nbsp; Sua vontade de evoluir</div>
+        <div class="quality-item">✨ &nbsp; Seu jeito de incentivar quem você ama</div>
+        <div class="quality-item">✨ &nbsp; Sua força</div>
+        <div class="quality-item">✨ &nbsp; Seu carinho</div>
+        <div class="quality-item">✨ &nbsp; O brilho dos seus olhos</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S11 — NA HORA CERTA (glass) ══ -->
+<div class="screen" id="s11">
+  <div class="glass-screen">
+    <img class="bg-img" src="foto05.jpeg" alt="">
+    <div class="glass-card">
+      <p class="eyebrow" style="margin-bottom:10px">na hora certa</p>
+      <p style="font-size:clamp(2rem,7vw,3.2rem);font-style:italic;color:var(--star);line-height:1.1;margin-bottom:16px">Você<br><span style="color:var(--gold)">apareceu...</span></p>
+      <p style="font-style:italic;font-size:clamp(.9rem,2.5vw,1.1rem);color:var(--mist);line-height:1.9">Hoje eu acredito que nossa história aconteceu exatamente quando deveria acontecer.</p>
+      <p style="font-style:italic;font-size:clamp(.9rem,2.5vw,1.1rem);color:var(--gold);line-height:1.9;margin-top:12px">Mas a vida encontrou o momento certo.<br>E foi nesse momento que você apareceu.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S12 — DISTÂNCIA + MAPA ══ -->
+<div class="screen" id="s12">
+  <p class="eyebrow">a distância que escolhemos</p>
+  <div class="map-container">
+    <!-- Vídeo do mapa animado -->
+    <div class="map-svg-wrap" style="background:#07101f;border-radius:16px;overflow:hidden;border:1px solid rgba(240,198,116,.2);width:100%;aspect-ratio:9/16;max-height:55vh;display:flex;align-items:center;justify-content:center;position:relative">
+      <video src="mapa01.mp4" autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:16px"></video>
+      <!-- overlay sutil para manter o estilo -->
+      <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(7,16,31,.08),rgba(7,16,31,.18));pointer-events:none;border-radius:16px"></div>
+      <!-- Labels sobre o vídeo -->
+      <div style="position:absolute;bottom:12px;left:0;right:0;display:flex;justify-content:space-between;padding:0 16px;pointer-events:none">
+        <span style="font-style:italic;font-size:.72rem;color:var(--sage);background:rgba(7,16,31,.65);padding:3px 8px;border-radius:8px">📍 Porto Alegre</span>
+        <span style="font-style:italic;font-size:.72rem;color:var(--gold);background:rgba(7,16,31,.65);padding:3px 8px;border-radius:8px">📍 Rio de Janeiro</span>
+      </div>
+    </div>
+    <div class="distance-cities">
+      <div class="dc">🌿 Porto Alegre<small>onde ela mora</small></div>
+      <div class="dc-arrow">✈</div>
+      <div class="dc">🌆 Rio de Janeiro<small>onde ele mora</small></div>
+    </div>
+    <p class="dc-km">"A distância testa. Mas a escolha permanece."</p>
+  </div>
+</div>
+
+<!-- ══ S13 — TIMELINE IMERSIVA ══ -->
+<div class="screen" id="s13">
+  <div class="tl-slider" id="tlSlider">
+
+    <!-- Slide 1: Setembro -->
+    <div class="tl-slide" id="tls1">
+      <img class="slide-bg" src="setembro.jpeg" alt="Setembro">
+      <div class="tl-content">
+        <span class="tl-emoji">✨</span>
+        <p class="tl-title">Setembro</p>
+        <p class="tl-desc">Uma noite no Parque Harmonia. O brilho dos seus olhos. Uma lembrança que ficou guardada sem eu saber.</p>
+      </div>
+    </div>
+
+    <!-- Slide 2: Fim do Ano -->
+    <div class="tl-slide" id="tls2">
+      <img class="slide-bg" src="fim-do-ano.jpeg" alt="Fim do Ano">
+      <div class="tl-content">
+        <span class="tl-emoji">🌅</span>
+        <p class="tl-title">Final do Ano</p>
+        <p class="tl-desc">A vida seguiu. Mas o contato voltou. E com ele, algo que começou devagar — e não parou mais.</p>
+      </div>
+    </div>
+
+    <!-- Slide 3: Verão -->
+    <div class="tl-slide" id="tls3">
+      <img class="slide-bg" src="verao.jpeg" alt="Verão">
+      <div class="tl-content">
+        <span class="tl-emoji">🌊</span>
+        <p class="tl-title">Verão</p>
+        <p class="tl-desc">Praias, conversas, sonhos, risadas. O que era pra ser passageiro foi virando a coisa mais certa da vida.</p>
+      </div>
+    </div>
+
+    <!-- Slide 4: Rio de Janeiro -->
+    <div class="tl-slide" id="tls4">
+      <video class="slide-bg" src="rio-de-janeiro.mp4" autoplay muted loop playsinline></video>
+      <div class="tl-content">
+        <span class="tl-emoji">💍</span>
+        <p class="tl-title">Rio de Janeiro</p>
+        <p class="tl-desc">O pedido de namoro. A escolha de ficar. A distância que não foi maior que a vontade de continuar.</p>
+      </div>
+    </div>
+
+    <!-- Slide 5: Hoje -->
+    <div class="tl-slide" id="tls5">
+      <video class="slide-bg" src="hoje.mp4" autoplay muted loop playsinline></video>
+      <div class="tl-content">
+        <span class="tl-emoji">❤️</span>
+        <p class="tl-title">Hoje</p>
+        <p class="tl-desc">Um amor que escolheu ficar. Que aprendeu a esperar. Que virou parte da vida sem pedir licença.</p>
+      </div>
+    </div>
+
+    <!-- Controles internos verticais -->
+    <button class="tl-arrow left" onclick="tlNav(-1)">↑</button>
+    <button class="tl-arrow right" onclick="tlNav(1)">↓</button>
+    <div class="tl-nav" id="tlDots"></div>
+  </div>
+</div>
+
+<!-- ══ S14 — GRANDE FINAL ══ -->
+<div class="screen" id="s14">
+  <div style="max-width:500px">
+    <span class="fl" id="fl1">A gente brincava que era só verão, lembra?</span>
+    <span class="fl" id="fl2" style="transition-delay:.4s">Que quando março chegasse, cada um ia para o seu canto.</span>
+    <span class="fl gld" id="fl3" style="transition-delay:.9s;margin-top:16px">"Mas a verdade é que nenhuma estação ia ser suficiente</span>
+    <span class="fl gld" id="fl4" style="transition-delay:1.5s">para o que a gente começou a sentir um pelo outro."</span>
+    <span class="fl" id="fl5" style="transition-delay:2.2s;margin-top:20px">Em setembro você era uma lembrança bonita.</span>
+    <span class="fl" id="fl6" style="transition-delay:2.8s">No verão virou parte da minha vida.</span>
+    <span class="fl gld" id="fl7" style="transition-delay:3.4s">E hoje continua sendo uma das minhas maiores certezas. 🌙</span>
+  </div>
+</div>
+
+<!-- ══ S15 — LETRA ══ -->
+<div class="screen" id="s15">
+  <p class="eyebrow" style="margin-bottom:24px">a letra</p>
+  <div class="lyrics-block">
+    <span class="l-tag">verso 1</span>
+    <p class="l-text">Eu não queria me envolver<br>Nem procurava alguém pra me apegar<br><br>Tinha tanta coisa acontecendo<br>Que eu nem pensava em me apaixonar<br><br>Mas numa noite de setembro<br>No Harmonia, no meio da multidão<br><br>Foi o brilho dos teus olhos<br>Que chamou a minha atenção<br><br>Depois a vida me levou pra longe<br>E eu segui sem imaginar<br><br>Que aquela noite de setembro<br>Ainda tinha história pra contar</p>
+    <div class="l-sep"></div>
+    <span class="l-tag p">pré-refrão</span>
+    <p class="l-text pre">Quando eu voltei no fim do ano<br>A gente resolveu se encontrar<br><br>E o que era só uma boa lembrança<br>Encontrou um jeito de continuar</p>
+    <div class="l-sep"></div>
+    <span class="l-tag r">refrão</span>
+    <p class="l-text chorus">E um novo ano foi chegando bem devagar<br>E você junto com ele, veio sem avisar<br><br>A gente brincava que era só verão<br>Que logo tudo ia passar<br><br>Mas o que era pra durar só uma estação<br>Resolveu se eternizar</p>
+    <div class="l-sep"></div>
+    <span class="l-tag">verso 2</span>
+    <p class="l-text">A gente foi se aproximando<br>Entre conversas e o barulho do mar<br><br>Falando sobre os nossos sonhos<br>Sem saber onde isso ia dar<br><br>Mas tem coisa que não dá pra disfarçar<br>Quando o olhar entrega mais que a voz<br><br>E foi assim, quase sem querer<br>Que o verão uniu nós dois</p>
+    <div class="l-sep"></div>
+    <span class="l-tag p">pré-refrão</span>
+    <p class="l-text pre">Quando eu voltei no fim do ano<br>A gente resolveu se encontrar<br><br>E o que era só uma boa lembrança<br>Encontrou um jeito de continuar</p>
+    <div class="l-sep"></div>
+    <span class="l-tag b">ponte</span>
+    <p class="l-text">Você procura as respostas no silêncio<br>Eu procuro na vontade de falar<br><br>Mas no meio do caminho a gente acha<br>O tempo certo de se encontrar<br><br>Mesmo quando a saudade aperta<br>E a distância insiste em testar<br><br>A gente escolhe todos os dias<br>Fazer esse amor continuar</p>
+    <div class="l-sep"></div>
+    <span class="l-tag r">refrão</span>
+    <p class="l-text chorus">E um novo ano foi chegando bem devagar<br>E você junto com ele, veio sem avisar<br><br>A gente brincava que era só verão<br>Que logo tudo ia passar<br><br>Mas o que era pra durar só uma estação<br>Resolveu se eternizar</p>
+    <div class="l-sep"></div>
+    <span class="l-tag o">saída</span>
+    <p class="l-text outro">E o que era só verão...<br><br>Resolveu se eternizar<br><br>No brilho dos teus olhos<br><br>Onde eu ainda gosto de me encontrar.</p>
+  </div>
+  <button class="btn-primary" onclick="nextScreen()" style="margin-top:28px">Continuar →</button>
+</div>
+
+<!-- ══ S16 — FINAL GLASSMORPHISM ══ -->
+<div class="screen" id="s16">
+  <div class="final-full">
+    <img class="final-bg" src="foto_favorita.jpeg" alt="Nós dois">
+    <div class="final-glass">
+      <span class="day-badge">Feliz Dia dos Namorados ❤️</span>
+      <p>Meu bem,</p>
+      <p>Obrigado por cada conversa.<br>Por cada viagem.<br>Por cada praia.<br>Por cada sonho compartilhado.</p>
+      <p>Obrigado por me mostrar que o amor<br>pode chegar quando menos esperamos.</p>
+      <p>E obrigado por continuar<br>escolhendo nós dois.</p>
+      <span class="sign">Eu te amo.<br>— Gilmar ❤️</span>
+      <button class="restart-btn" onclick="restartExp()">↺ &nbsp; Reviver do início</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /#app -->
+
+<style>
+/* quality items inline */
+.quality-item{font-style:italic;font-size:clamp(.88rem,2.5vw,1.05rem);color:var(--star);padding:10px 0;border-bottom:1px solid rgba(240,198,116,.08);text-align:left;opacity:0;transform:translateX(-16px);transition:opacity .5s ease,transform .5s ease}
+.quality-item:last-child{border-bottom:none}
+.quality-item.show{opacity:1;transform:translateX(0)}
+</style>
+
+<script>
+// ── STARS ──
+(function(){
+  const c=document.getElementById('stars-canvas'),x=c.getContext('2d');let s=[];
+  function r(){c.width=innerWidth;c.height=innerHeight;s=[];for(let i=0;i<260;i++)s.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.5+.2,sp:Math.random()*.006+.002,ph:Math.random()*Math.PI*2});}
+  function d(t){x.clearRect(0,0,c.width,c.height);s.forEach(p=>{const a=.2+.8*Math.abs(Math.sin(t/1000*p.sp+p.ph));x.beginPath();x.arc(p.x,p.y,p.r,0,Math.PI*2);x.fillStyle=`rgba(255,248,231,${a})`;x.fill();});requestAnimationFrame(d);}
+  r();addEventListener('resize',r);requestAnimationFrame(d);
+})();
+
+// ── PETALS ──
+const PETALS=['🌸','🌿','✿','🍃','❀','🌼'];
+function spawnPetal(){const p=document.createElement('div');p.className='petal';p.textContent=PETALS[Math.floor(Math.random()*PETALS.length)];p.style.left=Math.random()*100+'vw';p.style.fontSize=(.6+Math.random()*.8)+'rem';const dur=10+Math.random()*12;p.style.animationDuration=dur+'s';p.style.animationDelay=(Math.random()*2)+'s';document.body.appendChild(p);setTimeout(()=>p.remove(),(dur+3)*1000);}
+setInterval(spawnPetal,1800);
+
+// ── SCREENS ──
+const TOTAL=16;let cur=1;
+const SCROLL_SCREENS=[8,13,15];
+
+function buildDots(){
+  const w=document.getElementById('progress-dots');w.innerHTML='';
+  for(let i=1;i<=TOTAL;i++){const d=document.createElement('div');d.className='dot'+(i===cur?' active':'');d.id='dot'+i;w.appendChild(d);}
+}
+
+function goTo(n){
+  if(n<1||n>TOTAL)return;
+  document.getElementById('s'+cur).classList.remove('active');
+  document.getElementById('dot'+cur)?.classList.remove('active');
+  cur=n;
+  document.getElementById('s'+cur).classList.add('active');
+  document.getElementById('dot'+cur)?.classList.add('active');
+  document.getElementById('nav-prev').classList.toggle('visible',cur>2);
+  document.getElementById('nav-next').classList.toggle('visible',cur>=2&&cur<TOTAL);
+  triggerAnim(cur);
+}
+function nextScreen(){goTo(cur+1);}
+function prevScreen(){goTo(cur-1);}
+
+// tap to advance
+document.getElementById('app').addEventListener('click',function(e){
+  const tag=e.target.tagName.toLowerCase();
+  if(['button','input','a','audio','video','select'].includes(tag))return;
+  if(e.target.closest('#lightbox'))return;
+  if(e.target.closest('#tlSlider'))return;
+  if(cur===1)return;
+  if(SCROLL_SCREENS.includes(cur))return;
+  nextScreen();
+});
+
+// swipe
+let tx=0,ty=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx,dy=Math.abs(e.changedTouches[0].clientY-ty);
+  if(Math.abs(dx)>60&&dy<50&&!SCROLL_SCREENS.includes(cur)&&cur!==13){
+    if(dx<0)nextScreen();else prevScreen();
+  }
+},{passive:true});
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')nextScreen();
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')prevScreen();
+});
+
+// ── INTRO ──
+(function(){
+  const delays=[600,1400,2300,3000,3700,4400,5300];
+  [1,2,3,4,5,6,7].forEach((n,i)=>setTimeout(()=>document.getElementById('tl'+n)?.classList.add('show'),delays[i]));
+  setTimeout(()=>{document.getElementById('enter-btn').style.opacity='1';},6200);
+})();
+
+function startExp(){
+  document.getElementById('audio-el').play().catch(()=>{});
+  document.getElementById('fixed-player').classList.add('show');
+  goTo(2);for(let i=0;i<4;i++)spawnPetal();
+}
+
+function restartExp(){
+  const a=document.getElementById('audio-el');a.currentTime=0;a.play().catch(()=>{});
+  [1,2,3,4,5,6,7].forEach(n=>document.getElementById('tl'+n)?.classList.remove('show'));
+  document.getElementById('enter-btn').style.opacity='0';
+  goTo(1);
+  [1,2,3,4,5,6,7].forEach((n,i)=>setTimeout(()=>document.getElementById('tl'+n)?.classList.add('show'),[300,900,1600,2200,2800,3400,4100][i]));
+  setTimeout(()=>{document.getElementById('enter-btn').style.opacity='1';},5000);
+}
+
+// ── COUNTERS ──
+function diffTime(from){
+  const now=new Date(),start=new Date(from),diff=now-start;
+  const d=Math.floor(diff/86400000);
+  const h=Math.floor((diff%86400000)/3600000);
+  const m=Math.floor((diff%3600000)/60000);
+  const s=Math.floor((diff%60000)/1000);
+  return{d,h,m,s};
+}
+function renderCounter(id,from){
+  const el=document.getElementById(id);if(!el)return;
+  const{d,h,m,s}=diffTime(from);
+  el.innerHTML=`
+    <div class="c-unit"><span class="c-num">${d}</span><span class="c-label">dias</span></div>
+    <span class="c-sep">:</span>
+    <div class="c-unit"><span class="c-num">${String(h).padStart(2,'0')}</span><span class="c-label">horas</span></div>
+    <span class="c-sep">:</span>
+    <div class="c-unit"><span class="c-num">${String(m).padStart(2,'0')}</span><span class="c-label">min</span></div>
+    <span class="c-sep">:</span>
+    <div class="c-unit"><span class="c-num">${String(s).padStart(2,'0')}</span><span class="c-label">seg</span></div>
+  `;
+}
+setInterval(()=>{renderCounter('cd1','2025-09-10');renderCounter('cd2','2026-03-14');},1000);
+renderCounter('cd1','2025-09-10');renderCounter('cd2','2026-03-14');
+
+// ── TIMELINE SLIDER ──
+let tlCur=0;const TL_TOTAL=5;
+function buildTlDots(){
+  const w=document.getElementById('tlDots');w.innerHTML='';
+  for(let i=0;i<TL_TOTAL;i++){const d=document.createElement('div');d.className='tl-dot-item'+(i===0?' active':'');d.onclick=(()=>{const idx=i;return()=>goTl(idx);})();w.appendChild(d);}
+}
+function goTl(n){
+  if(n<0||n>=TL_TOTAL)return;
+  const slider=document.getElementById('tlSlider');
+  const slides=slider.querySelectorAll('.tl-slide');
+  slides.forEach((s,i)=>{s.style.transform=`translateY(${(i-n)*100}%)`;});
+  document.querySelectorAll('.tl-dot-item').forEach((d,i)=>d.classList.toggle('active',i===n));
+  tlCur=n;
+}
+function tlNav(dir){goTl(tlCur+dir);}
+
+// init TL slides positions
+function initTl(){
+  const slider=document.getElementById('tlSlider');
+  const slides=slider.querySelectorAll('.tl-slide');
+  slides.forEach((s,i)=>{s.style.position='absolute';s.style.inset='0';s.style.transform=`translateY(${i*100}%)`;s.style.transition='transform .6s cubic-bezier(.4,0,.2,1)';});
+  buildTlDots();
+}
+
+// swipe vertical dentro do timeline
+let tlTx=0,tlTy=0;
+document.getElementById('tlSlider').addEventListener('touchstart',e=>{tlTx=e.touches[0].clientX;tlTy=e.touches[0].clientY;},{passive:true});
+document.getElementById('tlSlider').addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tlTx;
+  const dy=e.changedTouches[0].clientY-tlTy;
+  // só reage ao swipe vertical se for mais vertical que horizontal
+  if(Math.abs(dy)>50&&Math.abs(dy)>Math.abs(dx)){
+    if(dy<0)tlNav(1);else tlNav(-1);
+  }
+},{passive:true});
+
+// ── ANIMS ──
+function triggerAnim(n){
+  if(n===3){['rl1','rl2','rl3','rl4'].forEach((id,i)=>setTimeout(()=>document.getElementById(id)?.classList.add('show'),i*700));}
+  if(n===6){for(let i=1;i<=7;i++)setTimeout(()=>document.getElementById('js'+i)?.classList.add('show'),i*250);}
+  if(n===9){
+    document.querySelectorAll('.num-card').forEach((el,i)=>setTimeout(()=>el.classList.add('show'),i*150));
+    setTimeout(()=>{document.getElementById('counter1')?.classList.add('show');},600);
+    setTimeout(()=>{document.getElementById('counter2')?.classList.add('show');},800);
+  }
+  if(n===10){document.querySelectorAll('.quality-item').forEach((el,i)=>setTimeout(()=>el.classList.add('show'),i*150));}
+  if(n===14){for(let i=1;i<=7;i++)document.getElementById('fl'+i)?.classList.add('show');}
+}
+
+// ── AUDIO ──
+const audio=document.getElementById('audio-el');
+const fpIcon=document.getElementById('fp-icon');
+const fpBar=document.getElementById('fp-bar');
+const fpBtn=document.getElementById('fp-play');
+const PLAY='<path d="M8 5v14l11-7z"/>';
+const PAUSE='<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+function toggleAudio(){if(audio.paused){audio.play().catch(()=>{});fpIcon.innerHTML=PAUSE;fpBtn.classList.add('playing');}else{audio.pause();fpIcon.innerHTML=PLAY;fpBtn.classList.remove('playing');}}
+audio.addEventListener('timeupdate',()=>{if(!audio.duration)return;fpBar.style.width=(audio.currentTime/audio.duration*100)+'%';});
+audio.addEventListener('play',()=>{fpIcon.innerHTML=PAUSE;fpBtn.classList.add('playing');});
+audio.addEventListener('ended',()=>{fpIcon.innerHTML=PLAY;fpBtn.classList.remove('playing');});
+function seekFp(e){const r=e.currentTarget.getBoundingClientRect();if(audio.duration)audio.currentTime=((e.clientX-r.left)/r.width)*audio.duration;}
+
+// ── LIGHTBOX ──
+function openLb(type,src){
+  if(!src)return;
+  const lb=document.getElementById('lightbox'),img=document.getElementById('lb-img'),vid=document.getElementById('lb-vid');
+  if(type==='img'){img.src=src;img.style.display='block';vid.style.display='none';}
+  else{vid.src=src;vid.style.display='block';img.style.display='none';}
+  lb.classList.add('open');
+}
+function closeLb(){
+  const lb=document.getElementById('lightbox'),vid=document.getElementById('lb-vid');
+  lb.classList.remove('open');vid.pause();vid.src='';document.getElementById('lb-img').src='';
+}
+document.getElementById('lightbox').addEventListener('click',function(e){if(e.target===this)closeLb();});
+
+// ── INIT ──
+buildDots();
+initTl();
+document.getElementById('s1').classList.add('active');
+</script>
+</body>
+</html>
