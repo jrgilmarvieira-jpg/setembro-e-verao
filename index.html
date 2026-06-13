@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Thayse & Gilmar — Nossa História</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* RESET & VARIÁVEIS */
+        :root {
+            --bg-color: #050810;
+            --text-main: #f4f4f5;
+            --accent-gold: #D4AF37;
+            --accent-rose: #C07C74;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(212, 175, 55, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* FUNDO DE PARTÍCULAS IMERSIVO */
+        #particles-js {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            top: 0; left: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ESTRUTURA DE ROLAGEM SNAP (Efeito App) */
+        .scroll-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            position: relative;
+            z-index: 1;
+            scroll-behavior: smooth;
+        }
+
+        section {
+            height: 100vh;
+            width: 100vw;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        /* TIPOGRAFIA */
+        h1, h2, h3 {
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            font-weight: 400;
+        }
+
+        .title-hero {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            color: var(--accent-gold);
+            letter-spacing: 0.1em;
+            text-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: clamp(0.9rem, 3vw, 1.2rem);
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent-rose);
+            opacity: 0.8;
+        }
+
+        .text-body {
+            font-size: clamp(1rem, 4vw, 1.3rem);
+            line-height: 1.8;
+            text-align: center;
+            max-width: 600px;
+            font-weight: 300;
+            margin-top: 2rem;
+        }
+
+        /* COMPONENTES GLASSMORPHISM */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            transform: translateY(30px);
+            opacity: 0;
+            transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* ANIMAÇÕES DE ENTRADA (Intersection Observer) */
+        .reveal.active .glass-card {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 1.2s ease-out;
+        }
+        
+        .reveal.active .fade-in {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* CONTADORES PREMIUM */
+        .counters-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .counter-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+
+        .counter-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(212, 175, 55, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 12px;
+            padding: 1rem 0.5rem;
+        }
+
+        .counter-num {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.2rem, 4vw, 2rem);
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        .counter-label {
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-main);
+            opacity: 0.6;
+            margin-top: 0.3rem;
+        }
+
+        /* IMAGENS COM MÁSCARAS EFEITO CINEMA */
+        .image-container {
+            width: 100%;
+            max-width: 350px;
+            aspect-ratio: 4/5;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 2rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.8) contrast(1.1);
+            transition: filter 0.5s ease;
+        }
+
+        .image-container::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, var(--bg-color) 0%, transparent 50%);
+        }
+
+        /* SCROLL INDICATOR */
+        .scroll-down {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.5;
+            animation: bounce 2s infinite;
+        }
+        .scroll-down span { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; }
+        .scroll-down i { color: var(--accent-gold); }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
+            40% { transform: translateY(-10px) translateX(-50%); }
+            60% { transform: translateY(-5px) translateX(-50%); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="particles-js"></div>
+
+    <div class="scroll-container" id="main-scroll">
+        
+        <section class="reveal">
+            <div class="fade-in" style="display: flex; flex-direction: column; align-items: center;">
+                <p class="subtitle" style="margin-bottom: 1rem;">O Verão que se Eternizou</p>
+                <h1 class="title-hero">Thayse & Gilmar</h1>
+                <p class="subtitle" style="margin-top: 1rem; color: var(--text-main);">Dia dos Namorados · 2026</p>
+            </div>
+            <div class="scroll-down">
+                <span>Deslize</span>
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <div class="image-container fade-in">
+                <img src="foto01.jpeg" alt="Nosso Encontro">
+            </div>
+            <div class="glass-card">
+                <h2 style="color: var(--accent-gold); font-size: 1.8rem; margin-bottom: 1rem;">Capítulo I</h2>
+                <p class="subtitle" style="font-size: 0.8rem;">O Brilho no Olhar</p>
+                <p class="text-body" style="font-size: 1rem;">O Parque Harmonia estava cheio de luzes e sons, mas a única coisa que realmente capturou minha atenção foi você. Uma noite que parecia comum, mas que, no silêncio de um olhar, já escrevia nossa história.</p>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <div class="glass-card" style="max-width: 600px;">
+                <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">O Tempo Corre</h2>
+                <p class="subtitle" style="font-size: 0.7rem; margin-bottom: 2rem;">Desde o nosso primeiro encontro</p>
+                
+                <div class="counter-grid">
+                    <div class="counter-box"><span class="counter-num" id="meet-d">0</span><span class="counter-label">Dias</span></div>
+                    <div class="counter-box"><span class="counter-num" id="meet-h">0</span><span class="counter-label">Horas</span></div>
+                    <div class="counter-box"><span class="counter-num" id="meet-m">0</span><span class="counter-label">Min</span></div>
+                    <div class="counter-box"><span class="counter-num" id="meet-s">0</span><span class="counter-label">Seg</span></div>
+                </div>
+                <p style="text-align: center; font-size: 0.7rem; margin-top: 1.5rem; opacity: 0.5;">10 de Setembro de 2025</p>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <div class="image-container fade-in">
+                <img src="foto_favorita.jpeg" alt="Nós">
+            </div>
+            <div class="glass-card">
+                <h2 style="color: var(--accent-rose); font-size: 1.8rem; margin-bottom: 1rem;">A Escolha</h2>
+                <p class="text-body" style="font-size: 1rem;">Do Rio a Porto Alegre. De Tramandaí a Imbituba. A distância tentou ser obstáculo, mas o verão nos provou que onde há vontade, nenhum quilômetro é grande demais. Nós escolhemos ficar.</p>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <div class="glass-card" style="max-width: 600px; border-color: rgba(192, 124, 116, 0.3);">
+                <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--accent-rose);">A Certeza</h2>
+                <p class="subtitle" style="font-size: 0.7rem; margin-bottom: 2rem;">Desde o nosso "Sim" Oficial</p>
+                
+                <div class="counter-grid">
+                    <div class="counter-box" style="background: rgba(192, 124, 116, 0.05); border-color: rgba(192, 124, 116, 0.2);"><span class="counter-num" id="date-d" style="color: var(--accent-rose);">0</span><span class="counter-label">Dias</span></div>
+                    <div class="counter-box" style="background: rgba(192, 124, 116, 0.05); border-color: rgba(192, 124, 116, 0.2);"><span class="counter-num" id="date-h" style="color: var(--accent-rose);">0</span><span class="counter-label">Horas</span></div>
+                    <div class="counter-box" style="background: rgba(192, 124, 116, 0.05); border-color: rgba(192, 124, 116, 0.2);"><span class="counter-num" id="date-m" style="color: var(--accent-rose);">0</span><span class="counter-label">Min</span></div>
+                    <div class="counter-box" style="background: rgba(192, 124, 116, 0.05); border-color: rgba(192, 124, 116, 0.2);"><span class="counter-num" id="date-s" style="color: var(--accent-rose);">0</span><span class="counter-label">Seg</span></div>
+                </div>
+                <p style="text-align: center; font-size: 0.7rem; margin-top: 1.5rem; opacity: 0.5;">14 de Março de 2026</p>
+            </div>
+        </section>
+
+        <section class="reveal">
+            <div class="fade-in" style="display: flex; flex-direction: column; align-items: center;">
+                <i class="fa-solid fa-quote-left" style="font-size: 2rem; color: var(--accent-gold); margin-bottom: 1rem; opacity: 0.5;"></i>
+                <p class="text-body" style="font-size: clamp(1.2rem, 5vw, 1.8rem); font-family: 'Cinzel', serif;">
+                    "O que era para durar só uma estação... resolveu se eternizar no brilho dos teus olhos."
+                </p>
+                <p class="subtitle" style="margin-top: 3rem; color: var(--accent-gold);">Eu te amo, Thayse.</p>
+                <p style="font-size: 0.8rem; margin-top: 1rem; opacity: 0.6; font-family: 'Cinzel', serif;">— Gilmar</p>
+            </div>
+        </section>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    
+    <script>
+        /* 1. CONFIGURAÇÃO DE PARTÍCULAS (Efeito Poeira Estelar Mágica) */
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+                "color": { "value": ["#D4AF37", "#C07C74", "#ffffff"] },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.5, "random": true, "anim": { "enable": true, "speed": 1, "opacity_min": 0.1, "sync": false } },
+                "size": { "value": 3, "random": true, "anim": { "enable": true, "speed": 2, "size_min": 0.1, "sync": false } },
+                "line_linked": { "enable": false },
+                "move": { "enable": true, "speed": 0.5, "direction": "none", "random": true, "straight": false, "out_mode": "out", "bounce": false }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": { "onhover": { "enable": true, "mode": "bubble" }, "onclick": { "enable": true, "mode": "repulse" }, "resize": true },
+                "modes": { "bubble": { "distance": 200, "size": 6, "duration": 2, "opacity": 0.8 }, "repulse": { "distance": 200, "duration": 0.4 } }
+            },
+            "retina_detect": true
+        });
+
+        /* 2. ANIMAÇÃO DE REVELAÇÃO NO SCROLL (Observer API) */
+        const observerOptions = {
+            root: document.querySelector('#main-scroll'),
+            rootMargin: '0px',
+            threshold: 0.5
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach((section) => {
+            observer.observe(section);
+        });
+
+        /* 3. LÓGICA DOS CONTADORES */
+        // Ajuste no mês: Janeiro é 0, Setembro é 8, Março é 2.
+        const dateMeeting = new Date(2025, 8, 10, 20, 0, 0); 
+        const dateDating = new Date(2026, 2, 14, 20, 0, 0);
+
+        function calcTimeDiff(targetDate, prefix) {
+            const now = new Date();
+            const diff = Math.max(0, now - targetDate);
+
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById(`${prefix}-d`).innerText = d;
+            document.getElementById(`${prefix}-h`).innerText = h;
+            document.getElementById(`${prefix}-m`).innerText = m;
+            document.getElementById(`${prefix}-s`).innerText = s;
+        }
+
+        setInterval(() => {
+            calcTimeDiff(dateMeeting, 'meet');
+            calcTimeDiff(dateDating, 'date');
+        }, 1000);
+        
+        calcTimeDiff(dateMeeting, 'meet');
+        calcTimeDiff(dateDating, 'date');
+    </script>
+</body>
+</html>
